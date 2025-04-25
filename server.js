@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Database Connection
-mongoose.connect('mongodb://localhost:27017/DemoApp')
+mongoose.connect('mongodb+srv://admin:admin@cluster0tesr.ba9zrzu.mongodb.net/DemoApp')
     .then(() => console.log('✅ Database Connected'))
     .catch(err => console.error('❌ Database Connection Error:', err));
 
