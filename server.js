@@ -5,16 +5,23 @@ const UserModel = require('./User');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// --- CORS Configuration ---
+const corsOptions = {
+    origin: 'http://localhost:3000', // Replace with your frontend origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Database Connection
+// --- Database Connection ---
 mongoose.connect('mongodb+srv://admin:admin@cluster0tesr.ba9zrzu.mongodb.net/DemoApp')
     .then(() => console.log('✅ Database Connected'))
     .catch(err => console.error('❌ Database Connection Error:', err));
 
-// Room Schema and Model
+// --- Hotel Room Schema and Model ---
 const RoomSchema = new mongoose.Schema({
     guestName: String,
     hotel: String,
@@ -25,12 +32,12 @@ const RoomSchema = new mongoose.Schema({
 });
 const RoomModel = mongoose.model('HotelRoom', RoomSchema, 'HotelRoom');
 
-// Default Route
+// --- Default Route ---
 app.get('/', (req, res) => {
     res.send('Hotel Management Server is running...');
 });
 
-// Room CRUD Routes
+// --- Room CRUD Routes ---
 app.get('/viewRooms', async (req, res) => {
     try {
         const userEmail = req.query.email;
@@ -47,10 +54,7 @@ app.get('/viewRooms', async (req, res) => {
 app.post('/addRoom', async (req, res) => {
     try {
         const { guestName, hotel, roomNumber, createdBy } = req.body;
-        if (!createdBy) {
-            return res.status(400).json({ error: 'User email is required' });
-        }
-        if (!guestName || !hotel || !roomNumber) {
+        if (!createdBy || !guestName || !hotel || !roomNumber) {
             return res.status(400).json({ error: 'All room fields are required' });
         }
         const newRoom = new RoomModel({ guestName, hotel, roomNumber, createdBy });
@@ -79,8 +83,8 @@ app.put('/editRoom/:id', async (req, res) => {
     try {
         const { guestName, hotel, roomNumber, createdBy } = req.body;
         const updatedRoom = await RoomModel.findByIdAndUpdate(
-            req.params.id, 
-            { guestName, hotel, roomNumber, createdBy }, 
+            req.params.id,
+            { guestName, hotel, roomNumber, createdBy },
             { new: true }
         );
         if (!updatedRoom) return res.status(404).json({ message: 'Room not found' });
@@ -100,7 +104,7 @@ app.delete('/deleteRoom/:id', async (req, res) => {
     }
 });
 
-// User Routes (Signup and Login)
+// --- User Signup & Login Routes ---
 app.post('/signup', async (req, res) => {
     try {
         const { name, email, phone, location, password } = req.body;
@@ -141,7 +145,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Start Server
+// --- Start Server ---
 const PORT = 8000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
